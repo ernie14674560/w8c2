@@ -16,8 +16,9 @@ class RegisterForm(FlaskForm):
     def validate_username(self, field):
         if User.query.filter_by(username=field.data).first():
             raise ValidationError('username used')
+
         if re.findall('[^A-Za-z0-9]', field.data):
-            raise ValidationError('only ASCII character are allowed')
+            raise ValidationError('only number and English alphabet are allowed')
 
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():
@@ -35,13 +36,17 @@ class RegisterForm(FlaskForm):
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[Required(), Email()])
+    username = StringField('Username', validators=[Required(), Length(3, 24)])
     password = PasswordField('Password', validators=[Required(), Length(6, 24)])
     remember_me = BooleanField('Remember me')
 
-    def validate_email(self, field):
-        if field.data and not User.query.filter_by(email=field.data).first():
-            raise ValidationError('email not register')
+    #def validate_email(self, field):
+    #    if field.data and not User.query.filter_by(email=field.data).first():
+    #        raise ValidationError('email not register')
 
+    def validate_username(self, field):
+        if field.data and not User.query.filter_by(username=field.data).first():
+            raise ValidationError('username not register')
     def validate_password(self, field):
         user = User.query.filter_by(email=self.email.data).first()
         if user and not user.check_password(field.data):
